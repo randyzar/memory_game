@@ -1,0 +1,110 @@
+.auth-page {
+  text-align: center;
+  margin-top: 50px;
+}
+
+form {
+  margin: 20px auto;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+form div {
+  margin-bottom: 10px;
+}
+
+form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+form input {
+  padding: 8px;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+}
+
+.success {
+  color: green;
+}
+
+/* Estilo general de UserDashboard */
+.user-dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+
+  color: white;
+  position: relative;
+}
+
+.user-dashboard .logo {
+  position: fixed;
+  top: 10px;
+left: 20px;
+  width: 250px; /* Tamaño del logo ajustado */
+}
+
+.dashboard-content {
+  text-align: center;
+}
+
+.dashboard-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px; /* Mayor espacio debajo del título */
+}
+
+.menu-options {
+  display: flex;
+  flex-direction: column; /* Botones en columna */
+  align-items: center; /* Centrar botones horizontalmente */
+  gap: 20px; /* Espacio entre botones */
+  margin-top: 20px;
+}
+
+.menu-button {
+  padding: 20px 40px; /* Tamaño más grande */
+  font-size: 1.6rem;
+  background-color: #006600;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 300px; /* Ancho uniforme para los botones */
+  transition: background-color 0.3s ease;
+}
+
+.menu-button:hover {
+  background-color: #00cc00;
+}
+
+.logout-button {
+  margin-top: 30px;
+  padding: 20px 40px;
+  font-size: 1.6rem;
+  background-color: #cc0000;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 300px;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #ff3333;
+}
