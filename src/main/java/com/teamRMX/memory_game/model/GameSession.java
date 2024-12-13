@@ -59,5 +59,21 @@ public class GameSession {
     public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
+
+    private int remainingPairs; // Número de pares restantes
+
+    public int getRemainingPairs() {
+        return remainingPairs;
+    }
+
+    public void setRemainingPairs(int remainingPairs) {
+        this.remainingPairs = remainingPairs;
+    }
+
+    // Método para verificar si el juego se completó
+    public boolean isGameCompleted() {
+        return remainingPairs == 0;
+    }
+
 }
 

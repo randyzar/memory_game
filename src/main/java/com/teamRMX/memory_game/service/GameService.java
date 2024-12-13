@@ -27,11 +27,9 @@ public class GameService {
 
     // Iniciar un nuevo juego
     public GameSession startGame(Long userId, String difficulty) {
-        // Generar el tablero según la dificultad
         int gridSize = getGridSize(difficulty);
         List<String> board = generateBoard(gridSize);
 
-        // Crear una nueva sesión
         GameSession session = new GameSession();
         session.setSessionId(UUID.randomUUID().toString());
         session.setUserId(userId);
@@ -39,12 +37,12 @@ public class GameService {
         session.setBoard(board);
         session.setMatchedPairs(new HashMap<>());
         session.setStartTime(System.currentTimeMillis());
+        session.setRemainingPairs(gridSize / 2); // Total de pares
 
-        // Almacenar la sesión
         activeGames.put(session.getSessionId(), session);
-
         return session;
     }
+
 
     // Registrar un movimiento
     public boolean makeMove(String sessionId, int firstIndex, int secondIndex) {
@@ -53,18 +51,20 @@ public class GameService {
             throw new RuntimeException("Game session not found");
         }
 
-        // Verificar si las casillas son un par
         List<String> board = session.getBoard();
         boolean isMatch = board.get(firstIndex).equals(board.get(secondIndex));
 
-        // Si es un par, marcar como encontrado
         if (isMatch) {
             session.getMatchedPairs().put(firstIndex, true);
             session.getMatchedPairs().put(secondIndex, true);
+            session.setRemainingPairs(session.getRemainingPairs() - 1); // Reducir pares restantes
         }
 
         return isMatch;
     }
+
+
+
 
     // Finalizar el juego
     public int endGame(String sessionId) {
@@ -118,4 +118,9 @@ public class GameService {
                 throw new IllegalArgumentException("Invalid difficulty level");
         }
     }
+
+    public GameSession getSessionById(String sessionId) {
+        return activeGames.get(sessionId);
+    }
+
 }

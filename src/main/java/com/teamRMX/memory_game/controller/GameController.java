@@ -33,4 +33,14 @@ public class GameController {
     public ResponseEntity<Integer> endGame(@RequestParam String sessionId) {
         return ResponseEntity.ok(gameService.endGame(sessionId));
     }
+
+    // Verificar si el juego está completo
+    @GetMapping("/isComplete")
+    public ResponseEntity<Boolean> isGameComplete(@RequestParam String sessionId) {
+        GameSession session = gameService.getSessionById(sessionId); // Método en GameService para obtener la sesión
+        if (session == null) {
+            throw new RuntimeException("Game session not found");
+        }
+        return ResponseEntity.ok(session.isGameCompleted());
+    }
 }
