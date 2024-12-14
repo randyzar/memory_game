@@ -12,6 +12,10 @@ public class ImageController {
     @Autowired
     private ImageService imageService;
 
+    public ImageController(ImageService imageService) {
+        this.imageService = imageService;
+    }
+
     @PostMapping
     public ResponseEntity<Image> addImage(@RequestBody Image image) {
         return ResponseEntity.ok(imageService.addImage(image));

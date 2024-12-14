@@ -14,6 +14,10 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     public User registerUser(User user) {
         // Guardar el usuario directamente sin cifrar la contraseña
         return userRepository.save(user);

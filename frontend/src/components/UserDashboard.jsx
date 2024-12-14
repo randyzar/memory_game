@@ -1,56 +1,111 @@
-import React, { useState, useRef } from "react";
-import "../App.css";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import GamePage from "./GamePage";
 
+const UserDashboard = () => {
+    const [user, setUser] = useState(null);
+    const [scores, setScores] = useState([]);
+    const [sessionId, setSessionId] = useState(null);
+    const [difficulty, setDifficulty] = useState("easy");
+    const [isGameActive, setIsGameActive] = useState(false);
 
-// Recursos
-import logo from "../assets/images/letras_color_fondo.png"; // Imagen del logo
-import song1 from "../assets/audio/song1.mp3"; // Canción 1
-import song2 from "../assets/audio/song2.mp3"; // Canción 2
-import song3 from "../assets/audio/song3.mp3"; // Canción 3
+    // Cargar detalles del usuario y puntuaciones
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                window.location.href = "/login"; // Redirigir a login si no hay sesión activa
+                return;
+            }
+            try {
+                const userResponse = await axios.get(`/api/users/${userId}`);
+                setUser(userResponse.data);
 
-const UserDashboard = ({ onLogout }) => {
-    const songs = [song1, song2, song3]; // Lista de canciones
-    const [currentSongIndex, setCurrentSongIndex] = useState(0); // Índice de la canción actual
-    const audioRef = useRef(null); // Referencia al elemento de audio
+                const scoresResponse = await axios.get(`/api/scores/${userId}`);
+                setScores(scoresResponse.data);
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
 
-    // Manejar el fin de la canción actual
-    const handleSongEnd = () => {
-        setCurrentSongIndex((prevIndex) => (prevIndex + 1) % songs.length); // Siguiente canción
+        fetchUserData();
+    }, []);
+
+    const startGame = async () => {
+        try {
+            const userId = localStorage.getItem("userId");
+            const response = await axios.post("/api/game/start", null, {
+                params: { userId, difficulty },
+            });
+            setSessionId(response.data.sessionId);
+            setIsGameActive(true);
+        } catch (error) {
+            console.error("Error starting game:", error);
+        }
     };
 
-    return (
-        <div className="auth-page">
-            {/* Elemento de audio para las canciones */}
-            <audio
-                ref={audioRef}
-                src={songs[currentSongIndex]}
-                autoPlay
-                loop={false} // No hace bucle en esta canción, pero manejamos el bucle manualmente
-                onEnded={handleSongEnd} // Cambiar a la siguiente canción al terminar
-            />
+    const handleGameEnd = () => {
+        setIsGameActive(false);
+        setSessionId(null);
 
-            <img
-                src={logo} // Recurso del logo
-                alt="Logo"
-                className="logo"
-            />
-            <div className="dashboard-content">
-                <h1>Bienvenido</h1>
-                <div className="menu-options">
-                    <button onClick={() => alert("Iniciando un nuevo juego...")}>
-                        Nuevo Juego
-                    </button>
-                    <button onClick={() => alert("Mostrando el ranking...")}>
-                        Ranking
-                    </button>
-                    <button onClick={() => alert("Configuración de la cuenta...")}>
-                        Configuración
-                    </button>
+        // Actualizar las puntuaciones tras el fin de la partida
+        axios
+            .get(`/api/scores/${localStorage.getItem("userId")}`)
+            .then((response) => setScores(response.data))
+            .catch((error) => console.error("Error updating scores:", error));
+    };
+
+    if (!user) {
+        return <div>Loading...</div>;
+    }
+
+    return (
+        <div className="user-dashboard">
+            <h1>Welcome, {user.username}!</h1>
+
+            {!isGameActive ? (
+                <div>
+                    <h2>Your Scores</h2>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Difficulty</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {scores.map((score) => (
+                            <tr key={score.id}>
+                                <td>{score.difficulty}</td>
+                                <td>{score.score}</td>
+                                <td>{new Date(score.created_at).toLocaleDateString()}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+
+                    <div>
+                        <h2>Start a New Game</h2>
+                        <label>
+                            Difficulty:
+                            <select
+                                value={difficulty}
+                                onChange={(e) => setDifficulty(e.target.value)}
+                            >
+                                <option value="easy">Easy</option>
+                                <option value="normal">Normal</option>
+                                <option value="hard">Hard</option>
+                                <option value="professional">Professional</option>
+                                <option value="master">Master</option>
+                            </select>
+                        </label>
+                        <button onClick={startGame}>Start Game</button>
+                    </div>
                 </div>
-                <button className="logout-button" onClick={onLogout}>
-                    Cerrar Sesión
-                </button>
-            </div>
+            ) : (
+                <GamePage sessionId={sessionId} onGameEnd={handleGameEnd} />
+            )}
         </div>
     );
 };

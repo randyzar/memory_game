@@ -15,12 +15,16 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.registerUser(user));
     }
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<String> login(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
         String password = credentials.get("password");
@@ -33,6 +37,7 @@ public class UserController {
         }
     }
 
+
     // Obtener todos los usuarios
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
@@ -41,9 +46,10 @@ public class UserController {
 
     // Obtener un usuario por ID
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public User getUserById(@PathVariable("id") Long id) {
+        return userService.findById(id);
     }
+
 
     // Actualizar un usuario
     @PutMapping("/{id}")

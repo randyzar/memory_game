@@ -1,5 +1,5 @@
 package com.teamRMX.memory_game.model;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -11,14 +11,16 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonProperty("image_name")
     @Column(name = "image_name", nullable = false)
-    private String imageName; // Asegúrate de que esta propiedad tiene este nombre
+    private String imageName;
 
+    @JsonProperty("image_url")
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive;
+    private Boolean isActive = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

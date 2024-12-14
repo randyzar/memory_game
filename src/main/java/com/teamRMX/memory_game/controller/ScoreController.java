@@ -3,6 +3,7 @@ package com.teamRMX.memory_game.controller;
 import com.teamRMX.memory_game.model.Score;
 import com.teamRMX.memory_game.service.ScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +18,14 @@ public class ScoreController {
 
     // Registrar un puntaje
     @PostMapping("/user/{userId}")
-    public ResponseEntity<Score> addScore(@PathVariable Long userId, @RequestBody Score score) {
-        return ResponseEntity.ok(scoreService.addScore(userId, score));
+    public ResponseEntity<?> addScore(@PathVariable Long userId, @RequestBody Score score) {
+        try {
+            return ResponseEntity.ok(scoreService.addScore(userId, score));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
     }
+
 
     // Obtener todos los puntajes
     @GetMapping

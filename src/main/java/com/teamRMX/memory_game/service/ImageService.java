@@ -11,6 +11,11 @@ public class ImageService {
     @Autowired
     private ImageRepository imageRepository;
 
+    public ImageService(ImageRepository imageRepository) {
+        this.imageRepository = imageRepository;
+    }
+
+
     // Obtener todas las imágenes
     public List<Image> getAllImages() {
         return imageRepository.findAll();
