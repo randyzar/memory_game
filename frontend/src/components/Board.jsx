@@ -2,9 +2,16 @@ import React from "react";
 import Card from "./Card";
 
 const Board = ({ board, handleMove }) => {
+    const [selectedCards, setSelectedCards] = React.useState([]);
+
     const handleCardClick = (index) => {
-        // Implementa la lógica para manejar los clics en las tarjetas.
-        console.log("Card clicked at index:", index);
+        const newSelection = [...selectedCards, index];
+        setSelectedCards(newSelection);
+
+        if (newSelection.length === 2) {
+            handleMove(newSelection[0], newSelection[1]);
+            setSelectedCards([]);
+        }
     };
 
     return (
@@ -14,6 +21,7 @@ const Board = ({ board, handleMove }) => {
                     key={index}
                     index={index}
                     imageUrl={imageUrl}
+                    isFlipped={selectedCards.includes(index)}
                     handleClick={handleCardClick}
                 />
             ))}

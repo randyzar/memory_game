@@ -8,8 +8,18 @@ const GamePage = () => {
     const [board, setBoard] = useState([]);
     const [isGameComplete, setIsGameComplete] = useState(false);
     const [score, setScore] = useState(null);
+    const [userId, setUserId] = useState(null);
+    const [username, setUsername] = useState("");
 
-    const startGame = async (userId, difficulty) => {
+    useEffect(() => {
+        const loggedInUser = localStorage.getItem("userId");
+        if (loggedInUser) {
+            setUserId(loggedInUser);
+            setUsername(localStorage.getItem("username"));
+        }
+    }, []);
+
+    const startGame = async (difficulty) => {
         try {
             const response = await axios.post("/api/game/start", null, {
                 params: { userId, difficulty },
@@ -47,16 +57,34 @@ const GamePage = () => {
                     params: { sessionId },
                 });
                 setScore(endResponse.data);
+
+                // Registrar puntuación en el backend
+                await axios.post("/api/scores", {
+                    userId,
+                    difficulty: board.difficulty,
+                    score: endResponse.data,
+                });
             }
         } catch (error) {
             console.error("Error checking game completion:", error);
         }
     };
 
+    if (!userId) {
+        return (
+            <div>
+                <h1>Welcome to the Memory Game</h1>
+                <button onClick={() => (window.location.href = "/login")}>
+                    Log in
+                </button>
+            </div>
+        );
+    }
+
     if (isGameComplete) {
         return (
             <div>
-                <h1>Game Over!</h1>
+                <h1>Game Over, {username}!</h1>
                 <p>Your Score: {score}</p>
             </div>
         );

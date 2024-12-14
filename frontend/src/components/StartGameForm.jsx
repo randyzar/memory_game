@@ -1,25 +1,15 @@
 import React, { useState } from "react";
 
 const StartGameForm = ({ startGame }) => {
-    const [userId, setUserId] = useState("");
     const [difficulty, setDifficulty] = useState("easy");
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        startGame(userId, difficulty);
+        startGame(difficulty);
     };
 
     return (
         <form onSubmit={handleSubmit}>
-            <label>
-                User ID:
-                <input
-                    type="text"
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                    required
-                />
-            </label>
             <label>
                 Difficulty:
                 <select
