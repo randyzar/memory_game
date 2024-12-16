@@ -17,8 +17,11 @@ const AuthPage = () => {
 
     const handleLoginSuccess = (user) => {
         console.log("Usuario logueado:", user);
-        setIsAnthenticated(true); //change auth state to true
+        localStorage.setItem("userId", user.id);
+        localStorage.setItem("username", user.username);
+        setIsAnthenticated(true);
     };
+
 
     const handleLogout = () => {
         setIsAnthenticated(false); // change auth state to false

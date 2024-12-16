@@ -9,16 +9,24 @@ const LoginForm = ({ onLoginSuccess }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:8080/api/users/login", {
+            const response = await axios.post("http://localhost:8080/api/users/auth/login", {
                 username,
                 password,
             });
-            onLoginSuccess(response.data);
+
+            // Guarda el token en localStorage
+            localStorage.setItem("token", response.data.token);
+
+            // Notifica el inicio de sesión exitoso
+            onLoginSuccess(response.data.user);
         } catch (err) {
-            console.error(err.response?.data || err.message); // Log completo del error
-            setError(err.response?.data?.message || "Credenciales inválidas.");
+            console.error(err.response?.data || err.message);
+            setError(err.response?.data || "Error al iniciar sesión");
         }
     };
+
+
+
 
 
     return (

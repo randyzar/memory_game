@@ -9,14 +9,14 @@ const UserDashboard = () => {
     const [difficulty, setDifficulty] = useState("easy");
     const [isGameActive, setIsGameActive] = useState(false);
 
-    // Cargar detalles del usuario y puntuaciones
     useEffect(() => {
         const fetchUserData = async () => {
-            const userId = localStorage.getItem("userId");
+            const userId = localStorage.getItem("userId"); // Recupera el ID del usuario
             if (!userId) {
-                window.location.href = "/login"; // Redirigir a login si no hay sesión activa
+                window.location.href = "/login"; // Redirige si no hay sesión activa
                 return;
             }
+
             try {
                 const userResponse = await axios.get(`/api/users/${userId}`);
                 setUser(userResponse.data);
@@ -31,6 +31,8 @@ const UserDashboard = () => {
         fetchUserData();
     }, []);
 
+
+
     const startGame = async () => {
         try {
             const userId = localStorage.getItem("userId");
@@ -43,6 +45,7 @@ const UserDashboard = () => {
             console.error("Error starting game:", error);
         }
     };
+
 
     const handleGameEnd = () => {
         setIsGameActive(false);

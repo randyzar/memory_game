@@ -3,8 +3,10 @@ package com.teamRMX.memory_game.controller;
 import com.teamRMX.memory_game.model.User;
 import com.teamRMX.memory_game.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.teamRMX.memory_game.repository.UserRepository;
 
 import java.util.Map;
 import java.util.List;
@@ -15,6 +17,20 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @PostMapping("/auth/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
+        try {
+            String username = credentials.get("username");
+            String password = credentials.get("password");
+            User user = userService.authenticateUser(username, password);
+            String token = userService.generateToken(user);
+            return ResponseEntity.ok(Map.of("token", token, "user", user));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        }
+    }
+
+
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -23,20 +39,6 @@ public class UserController {
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.registerUser(user));
     }
-
-    @PostMapping("/auth/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> credentials) {
-        String username = credentials.get("username");
-        String password = credentials.get("password");
-
-        try {
-            userService.authenticateUser(username, password);
-            return ResponseEntity.ok("Login successful");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
-    }
-
 
     // Obtener todos los usuarios
     @GetMapping

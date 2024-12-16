@@ -14,6 +14,7 @@ const Board = ({ board, handleMove }) => {
         }
     };
 
+
     return (
         <div className="board">
             {board.map((imageUrl, index) => (
