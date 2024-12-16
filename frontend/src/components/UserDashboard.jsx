@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import GamePage from "./GamePage";
+import ScoresPage from "./ScoresPage.jsx"
+import AdminImageManager from "./AdminImageManager.jsx";
 import logo from "../assets/images/letras_color_fondo.png"; // Asegúrate de tener el logo
 
 const UserDashboard = () => {
@@ -10,6 +12,9 @@ const UserDashboard = () => {
     const [sessionId, setSessionId] = useState(null);
     const [isGameActive, setIsGameActive] = useState(false);
     const [showScores, setShowScores] = useState(false);
+
+    const [showAdminImages, setShowAdminImages] = useState(false);
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
 
 
     useEffect(() => {
@@ -92,15 +97,35 @@ const UserDashboard = () => {
                 <img src={logo} alt="Logo" className="dashboard-logo" />
             </div>
 
-            {/* Contenido */}
-            {!isGameActive ? (
+            {/* Mostrar AdminImageManager si es Admin */}
+            {user?.isAdmin ? (
+                showAdminImages ? (
+                    <AdminImageManager />
+                ) : (
+                    <div className="menu-options">
+                        <button
+                            className="menu-button"
+                            onClick={() => setShowAdminImages(true)}
+                        >
+                            Administrar Imágenes
+                        </button>
+
+                    </div>
+                )
+            ) : null}
+
+            {/* Contenido del usuario normal */}
+            {showScores ? (
+                <ScoresPage onReturnToMenu={handleReturnToMenu} />
+            ) : !isGameActive ? (
                 <div className="menu-options">
                     {!showDifficultyOptions ? (
                         <>
                             <button className="menu-button" onClick={handleStartNewGame}>
                                 Jugar
                             </button>
-                            <button className="menu-button">Score onClick={() => setShowScores(true)}>
+                            <button className="menu-button" onClick={() => setShowScores(true)}>
+                                Scores
                             </button>
                             <button className="logout-button" onClick={handleLogout}>
                                 Salir
@@ -139,6 +164,9 @@ const UserDashboard = () => {
             )}
         </div>
     );
+
+
+
 };
 
 export default UserDashboard;

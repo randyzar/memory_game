@@ -22,8 +22,24 @@ public class ScoreService {
     public Score addScore(Long userId, Score score) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-        score.setUser(user); // Asignar el usuario
+
+        // Normalizar el valor de difficulty
+        String normalizedDifficulty = normalizeDifficulty(score.getDifficulty());
+        score.setDifficulty(normalizedDifficulty);
+        score.setUser(user);
+
         return scoreRepository.save(score);
+    }
+
+    private String normalizeDifficulty(String difficulty) {
+        switch (difficulty) {
+            case "Fácil (4x4)": return "easy";
+            case "Normal (6x6)": return "normal";
+            case "Difícil (8x8)": return "hard";
+            case "Profesional (10x10)": return "professional";
+            case "Master (12x12)": return "master";
+            default: return difficulty; // Retornar el valor original si no hay coincidencia
+        }
     }
 
     // Obtener todos los puntajes
