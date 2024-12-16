@@ -6,5 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ScoreRepository extends JpaRepository<Score, Long> {
-    List<Score> findByDifficultyOrderByScoreDesc(String difficulty);
+    // Puntajes por dificultad, ordenados por menor tiempo
+    List<Score> findByDifficultyOrderByScoreAsc(String difficulty);
+
+    // Top 10 puntajes por dificultad (menor tiempo primero)
+    List<Score> findTop10ByDifficultyOrderByScoreAsc(String difficulty);
 }

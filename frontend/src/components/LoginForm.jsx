@@ -6,6 +6,13 @@ const LoginForm = ({ onLoginSuccess }) => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
+    const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+
+
+    const toggleShowPassword = () => {
+        setShowPassword(!showPassword);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -25,13 +32,8 @@ const LoginForm = ({ onLoginSuccess }) => {
         }
     };
 
-
-
-
-
     return (
         <div className="login-form">
-            <h2>Iniciar Sesión</h2>
             {error && <p className="error">{error}</p>}
             <form onSubmit={handleSubmit}>
                 <div>
@@ -43,14 +45,22 @@ const LoginForm = ({ onLoginSuccess }) => {
                         required
                     />
                 </div>
-                <div>
+                <div style={{ position: "relative" }}>
                     <label>Contraseña:</label>
                     <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
+                    {/* Botón o ícono para mostrar/ocultar contraseña */}
+                    <button
+                        type="button"
+                        className="show-password-btn"
+                        onClick={toggleShowPassword}
+                    >
+                        {showPassword ? "Ocultar" : "Mostrar"}
+                    </button>
                 </div>
                 <button type="submit">Iniciar Sesión</button>
             </form>

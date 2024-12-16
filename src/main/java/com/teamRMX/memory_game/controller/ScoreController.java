@@ -16,16 +16,17 @@ public class ScoreController {
     @Autowired
     private ScoreService scoreService;
 
-    // Registrar un puntaje
+    // Registrar un puntaje (menor tiempo = mejor puntaje)
     @PostMapping("/user/{userId}")
     public ResponseEntity<?> addScore(@PathVariable Long userId, @RequestBody Score score) {
         try {
-            return ResponseEntity.ok(scoreService.addScore(userId, score));
+            score.setId(userId);
+            Score savedScore = scoreService.saveScore(score);
+            return ResponseEntity.ok(savedScore);
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
-
 
     // Obtener todos los puntajes
     @GetMapping
@@ -33,19 +34,15 @@ public class ScoreController {
         return ResponseEntity.ok(scoreService.getAllScores());
     }
 
-    // Obtener ranking por dificultad
+    // Obtener el ranking de mejores puntajes por dificultad (menor tiempo primero)
     @GetMapping("/ranking/{difficulty}")
     public ResponseEntity<List<Score>> getRankingByDifficulty(@PathVariable String difficulty) {
         return ResponseEntity.ok(scoreService.getRankingByDifficulty(difficulty));
     }
 
-    @GetMapping("/{difficulty}")
+    // Obtener los top puntajes por dificultad (opcional)
+    @GetMapping("/top/{difficulty}")
     public ResponseEntity<List<Score>> getTopScores(@PathVariable String difficulty) {
         return ResponseEntity.ok(scoreService.getTopScoresByDifficulty(difficulty));
-    }
-
-    @PostMapping
-    public ResponseEntity<Score> saveScore(@RequestBody Score score) {
-        return ResponseEntity.ok(scoreService.saveScore(score));
     }
 }

@@ -1,30 +1,50 @@
-import React from "react";
-import Card from "./Card";
+import React, { useEffect, useState } from "react";
+import coverImage from "../assets/images/cover_page.png"; // Imagen de cubierta
 
-const Board = ({ board, handleMove }) => {
-    const [selectedCards, setSelectedCards] = React.useState([]);
+const Board = ({ board, handleMove, onGameComplete }) => {
+    const [selectedCards, setSelectedCards] = useState([]);
+    const [matchedCards, setMatchedCards] = useState(new Set());
 
     const handleCardClick = (index) => {
+        if (matchedCards.has(index) || selectedCards.includes(index)) return;
+
         const newSelection = [...selectedCards, index];
         setSelectedCards(newSelection);
 
         if (newSelection.length === 2) {
-            handleMove(newSelection[0], newSelection[1]);
-            setSelectedCards([]);
+            const [firstIndex, secondIndex] = newSelection;
+
+            if (board[firstIndex] === board[secondIndex]) {
+                setMatchedCards((prev) => new Set([...prev, firstIndex, secondIndex]));
+            }
+
+            setTimeout(() => {
+                setSelectedCards([]);
+            }, 1000);
+
+            handleMove(firstIndex, secondIndex);
         }
     };
 
+    // Verificar si todas las cartas están encontradas
+    useEffect(() => {
+        if (matchedCards.size === board.length) {
+            if (onGameComplete && typeof onGameComplete === "function") {
+                onGameComplete();
+            }
+        }
+    }, [matchedCards, board.length, onGameComplete]);
 
     return (
         <div className="board">
             {board.map((imageUrl, index) => (
-                <Card
-                    key={index}
-                    index={index}
-                    imageUrl={imageUrl}
-                    isFlipped={selectedCards.includes(index)}
-                    handleClick={handleCardClick}
-                />
+                <div key={index} className="card" onClick={() => handleCardClick(index)}>
+                    <img
+                        src={matchedCards.has(index) || selectedCards.includes(index) ? imageUrl : coverImage}
+                        alt="Card"
+                        className="card-image"
+                    />
+                </div>
             ))}
         </div>
     );

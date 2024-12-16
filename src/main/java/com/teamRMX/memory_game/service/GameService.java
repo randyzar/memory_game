@@ -68,9 +68,10 @@ public class GameService {
 
     // Finalizar el juego
     public int endGame(String sessionId) {
+        // Verificar si la sesión existe
         GameSession session = activeGames.remove(sessionId);
         if (session == null) {
-            throw new RuntimeException("Game session not found");
+            throw new IllegalArgumentException("Game session not found with ID: " + sessionId);
         }
 
         // Calcular el tiempo tomado

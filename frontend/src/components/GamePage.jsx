@@ -1,105 +1,125 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import StartGameForm from "./StartGameForm";
 import Board from "./Board";
 
-const GamePage = () => {
-    const [sessionId, setSessionId] = useState(null);
+const GamePage = ({ sessionId, difficulty, onReturnToMenu }) => {
     const [board, setBoard] = useState([]);
     const [isGameComplete, setIsGameComplete] = useState(false);
     const [score, setScore] = useState(null);
-    const [userId, setUserId] = useState(null);
-    const [username, setUsername] = useState("");
+    const [time, setTime] = useState(0);
+    const [timerActive, setTimerActive] = useState(true);
 
+    // Obtener el tablero de juego al iniciar
     useEffect(() => {
-        const loggedInUser = localStorage.getItem("userId");
-        if (loggedInUser) {
-            setUserId(loggedInUser);
-            setUsername(localStorage.getItem("username"));
-        }
-    }, []);
+        const fetchBoard = async () => {
+            try {
+                console.log("Iniciando juego con dificultad:", difficulty);
+                const userId = localStorage.getItem("userId");
 
-    const startGame = async (difficulty) => {
-        try {
-            const response = await axios.post("/api/game/start", null, {
-                params: { userId, difficulty },
-            });
-            setSessionId(response.data.sessionId);
-            setBoard(response.data.board);
-        } catch (error) {
-            console.error("Error starting game:", error);
-        }
-    };
+                // Mapear la dificultad seleccionada a las claves esperadas
+                const difficultyMapping = {
+                    "Fácil (4x4)": "easy",
+                    "Normal (6x6)": "normal",
+                    "Difícil (8x8)": "hard",
+                    "Profesional (10x10)": "professional",
+                    "Master (12x12)": "master",
+                };
 
+                const selectedDifficulty = difficultyMapping[difficulty] || difficulty;
+
+                const response = await axios.post("/api/game/start", null, {
+                    params: { userId, difficulty: selectedDifficulty },
+                });
+
+
+                console.log("Respuesta del servidor:", response.data);
+
+                if (response.data.board) {
+                    setBoard(response.data.board);
+                } else {
+                    console.error("El servidor no devolvió un tablero válido.");
+                }
+            } catch (error) {
+                console.error("Error al obtener el tablero de juego:", error.response?.data || error.message);
+            }
+        };
+
+        fetchBoard();
+    }, [difficulty]);
+
+
+    // Iniciar el cronómetro
+    useEffect(() => {
+        let timer;
+        if (timerActive) {
+            timer = setInterval(() => setTime((prev) => prev + 1), 1000);
+        }
+        return () => clearInterval(timer);
+    }, [timerActive]);
+
+    // Manejar movimientos
     const handleMove = async (firstIndex, secondIndex) => {
         try {
             const response = await axios.post("/api/game/move", null, {
                 params: { sessionId, firstIndex, secondIndex },
             });
             if (response.data) {
-                alert("It's a match!");
+                console.log("¡Movimiento correcto!");
             }
             checkGameCompletion();
         } catch (error) {
-            console.error("Error making move:", error);
+            console.error("Error al realizar el movimiento:", error);
         }
     };
 
+    // Verificar si el juego está completo
     const checkGameCompletion = async () => {
         try {
             const response = await axios.get("/api/game/isComplete", {
                 params: { sessionId },
             });
-            setIsGameComplete(response.data);
 
             if (response.data) {
+                setIsGameComplete(true);
+                setTimerActive(false);
+
                 const endResponse = await axios.post("/api/game/end", null, {
                     params: { sessionId },
                 });
                 setScore(endResponse.data);
-
-                // Registrar puntuación en el backend
-                await axios.post("/api/scores", {
-                    userId,
-                    difficulty: board.difficulty,
-                    score: endResponse.data,
-                });
             }
         } catch (error) {
-            console.error("Error checking game completion:", error);
+            console.error("Error al verificar la finalización del juego:", error);
         }
     };
 
-    if (!userId) {
-        return (
-            <div>
-                <h1>Welcome to the Memory Game</h1>
-                <button onClick={() => (window.location.href = "/login")}>
-                    Log in
-                </button>
-            </div>
-        );
-    }
-
-    if (isGameComplete) {
-        return (
-            <div>
-                <h1>Game Over, {username}!</h1>
-                <p>Your Score: {score}</p>
-            </div>
-        );
-    }
-
     return (
-        <div>
-            {!sessionId ? (
-                <StartGameForm startGame={startGame} />
+        <div className="game-page">
+            <h2>Dificultad: {difficulty}</h2>
+            <p>Tiempo: {time} segundos</p>
+
+            {isGameComplete ? (
+                <div>
+                    <h2>¡Juego Terminado!</h2>
+                    <p>Tu puntaje: {score}</p>
+                    <button className="menu-button" onClick={onReturnToMenu}>
+                        Regresar al Menú
+                    </button>
+                </div>
             ) : (
-                <Board board={board} handleMove={handleMove} />
+                <div>
+                    {board.length > 0 ? (
+                        <Board board={board} handleMove={handleMove} />
+                    ) : (
+                        <p>Cargando el tablero...</p>
+                    )}
+                    <button className="menu-button" onClick={onReturnToMenu}>
+                        Regresar al menú principal
+                    </button>
+                </div>
             )}
         </div>
     );
-
 };
 
 export default GamePage;

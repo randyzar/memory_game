@@ -1,28 +1,26 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import GamePage from "./GamePage";
+import logo from "../assets/images/letras_color_fondo.png"; // Asegúrate de tener el logo
 
 const UserDashboard = () => {
     const [user, setUser] = useState(null);
-    const [scores, setScores] = useState([]);
+    const [showDifficultyOptions, setShowDifficultyOptions] = useState(false); // Mostrar opciones de dificultad
+    const [difficulty, setDifficulty] = useState("Fácil (4x4)");
     const [sessionId, setSessionId] = useState(null);
-    const [difficulty, setDifficulty] = useState("easy");
     const [isGameActive, setIsGameActive] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
-            const userId = localStorage.getItem("userId"); // Recupera el ID del usuario
+            const userId = localStorage.getItem("userId");
             if (!userId) {
-                window.location.href = "/login"; // Redirige si no hay sesión activa
+                window.location.href = "/login";
                 return;
             }
 
             try {
                 const userResponse = await axios.get(`/api/users/${userId}`);
                 setUser(userResponse.data);
-
-                const scoresResponse = await axios.get(`/api/scores/${userId}`);
-                setScores(scoresResponse.data);
             } catch (error) {
                 console.error("Error fetching user data:", error);
             }
@@ -31,31 +29,53 @@ const UserDashboard = () => {
         fetchUserData();
     }, []);
 
+    // Función para mostrar opciones de dificultad
+    const handleStartNewGame = () => {
+        setShowDifficultyOptions(true);
+    };
 
-
+    // Función para iniciar el juego
     const startGame = async () => {
         try {
             const userId = localStorage.getItem("userId");
+
+            // Mapear la dificultad seleccionada en español a las claves esperadas en inglés
+            const difficultyMapping = {
+                "Fácil (4x4)": "easy",
+                "Normal (6x6)": "normal",
+                "Difícil (8x8)": "hard",
+                "Profesional (10x10)": "professional",
+                "Master (12x12)": "master",
+            };
+
+            const selectedDifficulty = difficultyMapping[difficulty]; // Convertir a inglés
+
             const response = await axios.post("/api/game/start", null, {
-                params: { userId, difficulty },
+                params: { userId, difficulty: selectedDifficulty },
             });
+
+            console.log("Juego iniciado:", response.data);
             setSessionId(response.data.sessionId);
             setIsGameActive(true);
+            setShowDifficultyOptions(false);
         } catch (error) {
-            console.error("Error starting game:", error);
+            console.error("Error al iniciar el juego:", error);
         }
     };
 
 
-    const handleGameEnd = () => {
+    // Función para regresar al menú principal
+    const handleReturnToMenu = () => {
+        setShowDifficultyOptions(false);
         setIsGameActive(false);
         setSessionId(null);
+    };
 
-        // Actualizar las puntuaciones tras el fin de la partida
-        axios
-            .get(`/api/scores/${localStorage.getItem("userId")}`)
-            .then((response) => setScores(response.data))
-            .catch((error) => console.error("Error updating scores:", error));
+    // Función para cerrar sesión
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        window.location.href = "/login";
     };
 
     if (!user) {
@@ -64,50 +84,54 @@ const UserDashboard = () => {
 
     return (
         <div className="user-dashboard">
-            <h1>Welcome, {user.username}!</h1>
+            {/* Logo y mensaje de bienvenida */}
+            <div className="header">
+                <img src={logo} alt="Logo" className="dashboard-logo" />
+            </div>
 
+            {/* Contenido */}
             {!isGameActive ? (
-                <div>
-                    <h2>Your Scores</h2>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Difficulty</th>
-                            <th>Score</th>
-                            <th>Date</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {scores.map((score) => (
-                            <tr key={score.id}>
-                                <td>{score.difficulty}</td>
-                                <td>{score.score}</td>
-                                <td>{new Date(score.created_at).toLocaleDateString()}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-
-                    <div>
-                        <h2>Start a New Game</h2>
-                        <label>
-                            Difficulty:
+                <div className="menu-options">
+                    {!showDifficultyOptions ? (
+                        <>
+                            <button className="menu-button" onClick={handleStartNewGame}>
+                                Jugar
+                            </button>
+                            <button className="menu-button">Score</button>
+                            <button className="logout-button" onClick={handleLogout}>
+                                Salir
+                            </button>
+                        </>
+                    ) : (
+                        <div className="difficulty-options">
+                            <h2>Elige la dificultad</h2>
                             <select
                                 value={difficulty}
                                 onChange={(e) => setDifficulty(e.target.value)}
+                                className="difficulty-select"
                             >
-                                <option value="easy">Easy</option>
-                                <option value="normal">Normal</option>
-                                <option value="hard">Hard</option>
-                                <option value="professional">Professional</option>
-                                <option value="master">Master</option>
+                                <option value="Fácil (4x4)">Fácil (4x4)</option>
+                                <option value="Normal (6x6)">Normal (6x6)</option>
+                                <option value="Difícil (8x8)">Difícil (8x8)</option>
+                                <option value="Profesional (10x10)">Profesional (10x10)</option>
+                                <option value="Master (12x12)">Master (12x12)</option>
                             </select>
-                        </label>
-                        <button onClick={startGame}>Start Game</button>
-                    </div>
+                            <br />
+                            <button className="menu-button" onClick={startGame}>
+                                Iniciar
+                            </button>
+                            <button className="logout-button" onClick={handleReturnToMenu}>
+                                Regresar
+                            </button>
+                        </div>
+                    )}
                 </div>
             ) : (
-                <GamePage sessionId={sessionId} onGameEnd={handleGameEnd} />
+                <GamePage
+                    sessionId={sessionId}
+                    difficulty={difficulty}
+                    onReturnToMenu={handleReturnToMenu}
+                />
             )}
         </div>
     );
