@@ -20,8 +20,8 @@ public class ScoreController {
     @PostMapping("/user/{userId}")
     public ResponseEntity<?> addScore(@PathVariable Long userId, @RequestBody Score score) {
         try {
-            score.setId(userId);
-            Score savedScore = scoreService.saveScore(score);
+
+            Score savedScore = scoreService.addScore(userId, score);
             return ResponseEntity.ok(savedScore);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());

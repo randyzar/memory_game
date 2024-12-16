@@ -29,9 +29,7 @@ const Board = ({ board, handleMove, onGameComplete }) => {
     // Verificar si todas las cartas están encontradas
     useEffect(() => {
         if (matchedCards.size === board.length) {
-            if (onGameComplete && typeof onGameComplete === "function") {
-                onGameComplete();
-            }
+            onGameComplete(); // Notificar al padre cuando termina el juego
         }
     }, [matchedCards, board.length, onGameComplete]);
 

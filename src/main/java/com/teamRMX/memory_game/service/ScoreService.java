@@ -22,20 +22,7 @@ public class ScoreService {
     public Score addScore(Long userId, Score score) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-
-        if (score.getScore() <= 0) {
-            throw new RuntimeException("El puntaje debe ser mayor que 0.");
-        }
-
-        score.setUser(user);
-        return scoreRepository.save(score);
-    }
-
-    // Guardar puntaje directamente
-    public Score saveScore(Score score) {
-        if (score.getScore() <= 0) {
-            throw new RuntimeException("El puntaje debe ser mayor que 0.");
-        }
+        score.setUser(user); // Asignar el usuario
         return scoreRepository.save(score);
     }
 

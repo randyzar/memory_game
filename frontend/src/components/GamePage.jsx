@@ -72,24 +72,25 @@ const GamePage = ({ sessionId, difficulty, onReturnToMenu }) => {
         }
     };
 
-    // Verificar si el juego está completo
-    const checkGameCompletion = async () => {
+    // Terminar el juego y guardar el puntaje
+    const handleGameComplete = async () => {
         try {
-            const response = await axios.get("/api/game/isComplete", {
+            setTimerActive(false);
+            setIsGameComplete(true);
+
+            const endResponse = await axios.post("/api/game/end", null, {
                 params: { sessionId },
             });
 
-            if (response.data) {
-                setIsGameComplete(true);
-                setTimerActive(false);
+            // Guardar el tiempo como puntaje
+            await axios.post(`/api/scores/user/${localStorage.getItem("userId")}`, {
+                difficulty: difficulty,
+                score: time, // Se guarda el tiempo como score
+            });
 
-                const endResponse = await axios.post("/api/game/end", null, {
-                    params: { sessionId },
-                });
-                setScore(endResponse.data);
-            }
+            setScore(endResponse.data);
         } catch (error) {
-            console.error("Error al verificar la finalización del juego:", error);
+            console.error("Error al finalizar el juego:", error.response?.data || error.message);
         }
     };
 
@@ -101,7 +102,7 @@ const GamePage = ({ sessionId, difficulty, onReturnToMenu }) => {
             {isGameComplete ? (
                 <div>
                     <h2>¡Juego Terminado!</h2>
-                    <p>Tu puntaje: {score}</p>
+
                     <button className="menu-button" onClick={onReturnToMenu}>
                         Regresar al Menú
                     </button>
@@ -109,7 +110,7 @@ const GamePage = ({ sessionId, difficulty, onReturnToMenu }) => {
             ) : (
                 <div>
                     {board.length > 0 ? (
-                        <Board board={board} handleMove={handleMove} />
+                        <Board board={board} handleMove={handleMove} onGameComplete={handleGameComplete} />
                     ) : (
                         <p>Cargando el tablero...</p>
                     )}
