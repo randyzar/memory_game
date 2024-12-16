@@ -9,6 +9,8 @@ const UserDashboard = () => {
     const [difficulty, setDifficulty] = useState("Fácil (4x4)");
     const [sessionId, setSessionId] = useState(null);
     const [isGameActive, setIsGameActive] = useState(false);
+    const [showScores, setShowScores] = useState(false);
+
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -69,6 +71,7 @@ const UserDashboard = () => {
         setShowDifficultyOptions(false);
         setIsGameActive(false);
         setSessionId(null);
+        setShowScores(false);
     };
 
     // Función para cerrar sesión
@@ -97,7 +100,8 @@ const UserDashboard = () => {
                             <button className="menu-button" onClick={handleStartNewGame}>
                                 Jugar
                             </button>
-                            <button className="menu-button">Score</button>
+                            <button className="menu-button">Score onClick={() => setShowScores(true)}>
+                            </button>
                             <button className="logout-button" onClick={handleLogout}>
                                 Salir
                             </button>
