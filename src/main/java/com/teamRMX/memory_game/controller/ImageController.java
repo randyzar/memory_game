@@ -2,6 +2,7 @@ package com.teamRMX.memory_game.controller;
 import com.teamRMX.memory_game.model.Image;
 import com.teamRMX.memory_game.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -17,9 +18,13 @@ public class ImageController {
     }
 
     @PostMapping
-    public ResponseEntity<Image> addImage(@RequestBody Image image) {
+    public ResponseEntity<?> addImage(@RequestBody Image image) {
+        if (image.getImageName() == null || image.getImageUrl() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El nombre y la URL son obligatorios.");
+        }
         return ResponseEntity.ok(imageService.addImage(image));
     }
+
 
     //OBTENER TODAS LAS IMAGENES
     @GetMapping

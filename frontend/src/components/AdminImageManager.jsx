@@ -16,7 +16,14 @@ const AdminImageManager = () => {
         setLoading(true);
         try {
             const response = await axios.get("/api/images");
-            setImages(response.data);
+            // Mapear las claves del backend al frontend
+            const mappedImages = response.data.map((img) => ({
+                id: img.id,
+                imageName: img.image_name, // Mapear image_name a imageName
+                imageUrl: img.image_url,   // Mapear image_url a imageUrl
+                isActive: img.is_active    // Mapear is_active a isActive
+            }));
+            setImages(mappedImages);
         } catch (error) {
             console.error("Error al obtener imágenes:", error);
         } finally {
@@ -24,22 +31,46 @@ const AdminImageManager = () => {
         }
     };
 
+
     useEffect(() => {
         fetchImages();
     }, []);
 
     // Agregar una nueva imagen
     const handleAddImage = async () => {
-        if (!newImage.imageName || !newImage.imageUrl) return;
-
         try {
-            await axios.post("/api/images", newImage);
-            setNewImage({ imageName: "", imageUrl: "", isActive: true });
-            fetchImages();
+            const response = await axios.post("/api/images", {
+                image_name: newImage.imageName, // Clave compatible con el backend
+                image_url: newImage.imageUrl,   // Clave compatible con el backend
+                isActive: newImage.isActive
+            });
+            console.log("Imagen añadida:", response.data);
+            setNewImage({ imageName: "", imageUrl: "", isActive: true }); // Limpiar el formulario
+            fetchImages(); // Refresca la lista de imágenes
         } catch (error) {
-            console.error("Error al agregar imagen:", error);
+            console.error("Error al agregar imagen:", error.response?.data || error.message);
         }
     };
+
+
+    const handleEdit = (image) => {
+        setEditingImage({ ...image }); // Establece la imagen en edición
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editingImage?.id) return;
+
+        try {
+            await axios.put(`/api/images/${editingImage.id}`, editingImage);
+            setEditingImage(null);
+            fetchImages(); // Refrescar la lista
+        } catch (error) {
+            console.error("Error al actualizar la imagen:", error.response?.data || error.message);
+        }
+    };
+
+
+
 
     // Actualizar una imagen existente
     const handleUpdateImage = async (id) => {
@@ -107,24 +138,50 @@ const AdminImageManager = () => {
                             <tr key={image.id}>
                                 <td>
                                     <img
-                                        src={image.imageUrl}
+                                        src={image.imageUrl} // Vista previa de la imagen
                                         alt={image.imageName}
                                         className="image-preview"
                                     />
                                 </td>
                                 <td>{image.imageName}</td>
                                 <td>{image.imageUrl}</td>
-                                <td className="button-container">
-                                    <button className="button-edit" onClick={() => handleEdit(image.id)}>
-                                        Editar
-                                    </button>
-                                    <button className="button-delete" onClick={() => handleDelete(image.id)}>
-                                        Eliminar
-                                    </button>
+                                <td>
+                                    {editingImage?.id === image.id ? (
+                                        <>
+                                            <input
+                                                type="text"
+                                                value={editingImage.imageName}
+                                                onChange={(e) =>
+                                                    setEditingImage({...editingImage, imageName: e.target.value})
+                                                }
+                                            />
+                                            <input
+                                                type="text"
+                                                value={editingImage.imageUrl}
+                                                onChange={(e) =>
+                                                    setEditingImage({...editingImage, imageUrl: e.target.value})
+                                                }
+                                            />
+                                            <button onClick={handleSaveEdit} className="button-save">Guardar</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button onClick={() => handleEdit(image)} className="button-edit">
+                                                Editar
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteImage(image.id)}
+                                                className="button-delete"
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </>
+                                    )}
                                 </td>
                             </tr>
                         ))}
                         </tbody>
+
                     </table>
 
                 </div>

@@ -337,7 +337,7 @@ tr:nth-child(even) {
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #ffffff; /* Fondo blanco */
+  background-color: #000000; /* Fondo blanco */
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
@@ -359,11 +359,7 @@ tr:nth-child(even) {
 }
 
 .admin-table tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.admin-table tr:hover {
-  background-color: #f1f1f1;
+  background-color: #000000;
 }
 
 .image-preview {
